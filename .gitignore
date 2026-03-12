@@ -1,0 +1,33 @@
+# env
+.env
+.env.*
+
+# python
+__pycache__/
+*.pyc
+*.pyo
+
+# virtual env
+.venv/
+venv/
+
+# vector db
+data/chroma/
+
+# real meetings
+meetings/real_*
+
+# private outputs
+outputs/private/
+outputs/raw/
+
+# logs
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# editor
+.vscode/
+.idea/
