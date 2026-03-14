@@ -1,0 +1,5 @@
+retrieval:
+  default_collection: pdf_chunks_v1
+  default_top_k: 7
+  default_fetch_k: 30
+  default_lam: 0.9

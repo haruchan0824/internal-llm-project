@@ -52,6 +52,19 @@ This project is intended for AI engineer job applications, so the repository sho
 - Keep existing commands working during migration whenever practical.
 - Avoid unnecessary abstractions or frameworks.
 
+
+## Incremental migration working agreement
+- Keep refactors small and reviewable (one script/module at a time).
+- For each move to `src/internal_llm/`, keep or add a thin CLI wrapper under `scripts/`.
+- Keep legacy entrypoints (`meeting_summary/`, `eval/`, `tools/`) working during migration whenever practical.
+- Prefer wrappers/delegation over deleting old files early.
+- Validate command compatibility after each step and document what changed in `MIGRATION_PLAN.md`.
+
+## Portfolio evidence policy (operational)
+- Any metric reported in README/reports must be traceable to committed code and artifacts.
+- If a result is incomplete or provisional, label it explicitly.
+- Include at least one representative failure/limitation example when summarizing evaluations.
+
 ## Target repository layout
 The repository should gradually move toward the following layout:
 

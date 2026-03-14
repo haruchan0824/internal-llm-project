@@ -1,0 +1,3 @@
+paths:
+  outputs_dir: outputs
+  chroma_dir: data/chroma
