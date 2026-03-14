@@ -5,8 +5,15 @@ import json
 import argparse
 from pathlib import Path
 from typing import Any, Dict, List
+import sys
+
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+SRC_DIR = PROJECT_ROOT / "src"
+if str(SRC_DIR) not in sys.path:
+    sys.path.insert(0, str(SRC_DIR))
 
 from rag_retrieval import Retriever
+from internal_llm.utils.config import get_config_value, load_project_config
 import re
 
 def norm_source(x):
@@ -44,12 +51,17 @@ def get_meta_source_page_range(md: dict):
     return src, to_int(ps), to_int(pe)
 
 # --- Paths (絶対パスで事故防止) ---
-PROJECT_ROOT = Path(__file__).resolve().parents[1]  # .../pdf_rag
 EVAL_DIR = PROJECT_ROOT / "eval"
 DEFAULT_QSET_PATH = EVAL_DIR / "qset.jsonl"
-DEFAULT_CHROMA_DIR = PROJECT_ROOT / "data" / "chroma"
 
-DEFAULT_COLLECTION = "pdf_chunks_v1"  # 互換のため残す（引数で上書き推奨）
+_paths_cfg = load_project_config(PROJECT_ROOT, "configs/paths.yaml")
+_retrieval_cfg = load_project_config(PROJECT_ROOT, "configs/retrieval.yaml")
+
+DEFAULT_CHROMA_DIR = PROJECT_ROOT / get_config_value(_paths_cfg, ["paths", "chroma_dir"], "data/chroma")
+DEFAULT_COLLECTION = get_config_value(_retrieval_cfg, ["retrieval", "default_collection"], "pdf_chunks_v1")
+DEFAULT_TOP_K = int(get_config_value(_retrieval_cfg, ["retrieval", "default_top_k"], 7))
+DEFAULT_FETCH_K = int(get_config_value(_retrieval_cfg, ["retrieval", "default_fetch_k"], 30))
+DEFAULT_LAM = float(get_config_value(_retrieval_cfg, ["retrieval", "default_lam"], 0.9))
 
 
 def load_qset(path: Path) -> List[Dict[str, Any]]:
@@ -160,9 +172,9 @@ def parse_args() -> argparse.Namespace:
 
     # method params
     p.add_argument("--method", type=str, default="topk", choices=["topk", "mmr"], help="Used when mode=single")
-    p.add_argument("--top_k", type=int, default=7, help="Top-k to return")
-    p.add_argument("--fetch_k", type=int, default=30, help="MMR candidate pool size (only for mmr)")
-    p.add_argument("--lam", type=float, default=0.9, help="MMR lambda (only for mmr)")
+    p.add_argument("--top_k", type=int, default=DEFAULT_TOP_K, help="Top-k to return")
+    p.add_argument("--fetch_k", type=int, default=DEFAULT_FETCH_K, help="MMR candidate pool size (only for mmr)")
+    p.add_argument("--lam", type=float, default=DEFAULT_LAM, help="MMR lambda (only for mmr)")
 
     return p.parse_args()
 

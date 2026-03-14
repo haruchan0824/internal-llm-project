@@ -6,9 +6,20 @@ import subprocess
 from pathlib import Path
 import sys
 
+SRC_DIR = Path(__file__).resolve().parents[1] / "src"
+if str(SRC_DIR) not in sys.path:
+    sys.path.insert(0, str(SRC_DIR))
+
+from internal_llm.utils.config import get_config_value, load_project_config
+
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
+_paths_cfg = load_project_config(PROJECT_ROOT, "configs/paths.yaml")
+_meeting_cfg = load_project_config(PROJECT_ROOT, "configs/meeting.yaml")
+
 MEETINGS_DIR = PROJECT_ROOT / "meetings"
-OUTPUTS_DIR = PROJECT_ROOT / "outputs"
+OUTPUTS_DIR = PROJECT_ROOT / str(get_config_value(_paths_cfg, ["paths", "outputs_dir"], "outputs"))
+DEFAULT_MODEL = get_config_value(_meeting_cfg, ["meeting", "default_model"], "gpt-4.1-mini")
+DEFAULT_INCLUDE_TABLES = bool(get_config_value(_meeting_cfg, ["meeting", "include_tables"], False))
 OUTPUTS_DIR.mkdir(parents=True, exist_ok=True)
 
 def run(cmd: list[str]) -> None:
@@ -20,9 +31,9 @@ def run(cmd: list[str]) -> None:
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--pattern", default="real_*", help="glob in meetings/ (default: real_*)")
-    ap.add_argument("--model", default="gpt-4.1-mini")
+    ap.add_argument("--model", default=DEFAULT_MODEL)
     ap.add_argument("--max_n", type=int, default=5)
-    ap.add_argument("--include_tables", action="store_true")
+    ap.add_argument("--include_tables", action="store_true", default=DEFAULT_INCLUDE_TABLES)
     args = ap.parse_args()
 
     files = sorted(MEETINGS_DIR.glob(args.pattern + ".*"))
